@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analytics — St.Clare Girls Centre</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar">
+    <div class="logo"><div class="logo-icon">STC</div><div class="logo-text">St.Clare Girls Centre<span>Excellence · Integrity · Service</span></div></div>
+    <button class="hamburger" id="hamburger"><i class="ti ti-menu-2"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="admissions.html">Admissions</a></li>
+      <li><a href="news.html">News & Events</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="analytics.html" class="active">Analytics</a></li>
+    </ul>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+
+      <!-- Dashboard header -->
+      <div class="analytics-header">
+        <h2>School Analytics Dashboard</h2>
+        <p>Academic Year 2025/26 &bull; Term 2 Overview &bull; Last updated: May 6, 2026</p>
+      </div>
+
+      <!-- Metric cards -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-val" data-target="1240">0</div>
+          <div class="metric-lbl">Total Students</div>
+          <div class="metric-change up">↑ +48 this term</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">85%</div>
+          <div class="metric-lbl">Exam Pass Rate</div>
+          <div class="metric-change up">↑ +2% vs last year</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">85%</div>
+          <div class="metric-lbl">Attendance Rate</div>
+          <div class="metric-change up">↑ +1.2%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val" data-target="62">0</div>
+          <div class="metric-lbl">Teaching Staff</div>
+          <div class="metric-change up">↑ 4 new hires</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-row">
+        <!-- Enrolment by form bar chart -->
+        <div class="chart-box">
+          <h4>Enrolment by form</h4>
+          <div class="bar-chart">
+            <div class="bar-wrap"><div class="bar-val">320</div><div class="bar" style="height:100%"></div><div class="bar-lbl">Grade 9</div></div>
+            <div class="bar-wrap"><div class="bar-val">310</div><div class="bar" style="height:97%"></div><div class="bar-lbl">Grade 10</div></div>
+            <div class="bar-wrap"><div class="bar-val">315</div><div class="bar" style="height:98%"></div><div class="bar-lbl">Form 3</div></div>
+            <div class="bar-wrap"><div class="bar-val">295</div><div class="bar" style="height:92%"></div><div class="bar-lbl">Form 4</div></div>
+          </div>
+        </div>
+
+        <!-- Gender donut chart (SVG) -->
+        <div class="chart-box">
+          <h4>Students by gender</h4>
+          <div style="display:flex; align-items:center; gap:1rem;">
+            <svg width="90" height="90" viewBox="0 0 90 90" aria-label="Gender breakdown pie chart">
+              <circle cx="45" cy="45" r="35" fill="none" stroke="#e8f0fb" stroke-width="14"/>
+              <circle cx="45" cy="45" r="35" fill="none" stroke="#1a4f8a" stroke-width="14"
+                stroke-dasharray="131 88" stroke-dashoffset="-22" transform="rotate(-90 45 45)"/>
+              <circle cx="45" cy="45" r="35" fill="none" stroke="#f0c040" stroke-width="14"
+                stroke-dasharray="88 131" stroke-dashoffset="-153" transform="rotate(-90 45 45)"/>
+              <text x="45" y="49" text-anchor="middle" font-size="11" font-weight="600"
+                fill="#1a4f8a" font-family="DM Sans,sans-serif">400</text>
+            </svg>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:.5rem;font-size:.85rem;color:var(--muted)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#1a4f8a"></div>Male: 0 (0%)
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#f0c040"></div>Female: 400 (100%)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subject scores bar chart -->
+      <div class="chart-box" style="margin-bottom:1.5rem">
+        <h4>Subject average scores — Term 2 Mock Exams</h4>
+        <div class="bar-chart" style="height:120px; margin-top:.5rem">
+          <div class="bar-wrap"><div class="bar-val">78%</div><div class="bar" style="height:78%;background:#2d72c8"></div><div class="bar-lbl">Maths</div></div>
+          <div class="bar-wrap"><div class="bar-val">82%</div><div class="bar" style="height:82%;background:#2d72c8"></div><div class="bar-lbl">English</div></div>
+          <div class="bar-wrap"><div class="bar-val">74%</div><div class="bar" style="height:74%;background:#2d72c8"></div><div class="bar-lbl">Science</div></div>
+          <div class="bar-wrap"><div class="bar-val">88%</div><div class="bar" style="height:88%;background:#2d72c8"></div><div class="bar-lbl">Kiswahili</div></div>
+          <div class="bar-wrap"><div class="bar-val">70%</div><div class="bar" style="height:70%;background:#2d72c8"></div><div class="bar-lbl">History</div></div>
+          <div class="bar-wrap"><div class="bar-val">76%</div><div class="bar" style="height:76%;background:#2d72c8"></div><div class="bar-lbl">Geography</div></div>
+          <div class="bar-wrap"><div class="bar-val">84%</div><div class="bar" style="height:84%;background:#2d72c8"></div><div class="bar-lbl">CRE</div></div>
+        </div>
+      </div>
+
+      <!-- Student status table -->
+      <div class="recent-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Form</th>
+              <th>Attendance</th>
+              <th>Mock Score</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Millicent Kanana</td><td>Form 4</td><td>97%</td><td>84%</td><td><span class="status-pill pill-pass">On Track</span></td></tr>
+            <tr><td>Emily Njeri</td><td>Form 3</td><td>88%</td><td>68%</td><td><span class="status-pill pill-pend">Needs Support</span></td></tr>
+            <tr><td>Monicah Kawera</td><td>Grade 10</td><td>99%</td><td>91%</td><td><span class="status-pill pill-pass">On Track</span></td></tr>
+            <tr><td>Glory Gatumi</td><td>Grade 9</td><td>72%</td><td>55%</td><td><span class="status-pill pill-fail">At Risk</span></td></tr>
+            <tr><td>Tabitha Wanjohi</td><td>Grade 9</td><td>95%</td><td>79%</td><td><span class="status-pill pill-pass">On Track</span></td></tr>
+            <tr><td>Agnes Nadoudou</td><td>Form 3</td><td>90%</td><td>72%</td><td><span class="status-pill pill-pend">Needs Support</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand"><div class="logo"><div class="logo-icon">STC</div><div class="logo-text" style="color:#fff">St.Clare Girls Centre<span>Excellence · Integrity · Service</span></div></div><p>Providing quality education since 2014.Meru, Kenya.</p></div>
+      <div class="footer-links"><h4>Quick Links</h4><ul><li><a href="../index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="admissions.html">Admissions</a></li><li><a href="news.html">News & Events</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div class="footer-contact"><h4>Contact</h4><p><i class="ti ti-map-pin"></i> Off Meru-Maua, Meru</p><p><i class="ti ti-phone"></i> +254 720 123 456</p><p><i class="ti ti-mail"></i> stclaregirls@gmail.com</p></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 St.Clare Girls Centre. All rights reserved.</p></div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Login — St Clare Girls School</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+
+      /* BACKGROUND PHOTO — replace url() with your actual image path */
+      background: linear-gradient(rgba(17, 83, 181, 0.72), rgba(10,30,60,0.72)),
+                  url('assets/school-bg.jpg') center/cover no-repeat;
+    }
+    .login-card {
+      background: #c25744;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .login-logo .logo-icon {
+      width: 56px; height: 56px; font-size: 20px;
+      margin: 0 auto .75rem;
+    }
+    .login-logo h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: var(--blue);
+      margin-bottom: .2rem;
+    }
+    .login-logo p {
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .login-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      font-size: .82rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: .35rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border .2s;
+    }
+    .form-group input:focus { border-color: var(--blue-light); }
+    .login-btn {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .2s;
+      margin-top: .5rem;
+    }
+    .login-btn:hover { background: var(--blue-light); }
+    .login-back {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: .83rem;
+      color: var(--muted);
+    }
+    .login-back a { color: var(--blue-light); }
+    .error-msg {
+      background: #fcebeb;
+      color: var(--red);
+      border: 1px solid #f7c1c1;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: .85rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .role-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1.25rem;
+    }
+    .role-tab {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: .82rem;
+      font-family: 'DM Sans', sans-serif;
+      background: #fff;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all .2s;
+      text-align: center;
+    }
+    .role-tab.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon" style="background:#e8f0fb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:#1a4f8a;">SC</div>
+        <h1>St Clare Girls School</h1>
+        <p>Staff Portal — Analytics &amp; Results</p>
+      </div>
+
+      <div class="role-tabs">
+        <button class="role-tab active" onclick="setRole('teacher',this)">
+          <i class="ti ti-school" style="font-size:14px;margin-right:4px"></i>Teacher
+        </button>
+        <button class="role-tab" onclick="setRole('admin',this)">
+          <i class="ti ti-shield" style="font-size:14px;margin-right:4px"></i>Admin
+        </button>
+        <button class="role-tab" onclick="setRole('hod',this)">
+          <i class="ti ti-users" style="font-size:14px;margin-right:4px"></i>HOD
+        </button>
+      </div>
+
+      <hr class="login-divider"/>
+
+      <div class="error-msg" id="errorMsg">
+        <i class="ti ti-alert-circle" style="margin-right:6px"></i>
+        Incorrect email or password. Please try again.
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Staff Email Address</label>
+          <input type="email" id="loginEmail" placeholder="yourname@stclare.ac.ke" required/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required/>
+        </div>
+        <button type="submit" class="login-btn">
+          <i class="ti ti-login" style="margin-right:6px"></i>Sign In to Portal
+        </button>
+      </form>
+
+      <div class="login-back">
+        <a href="index.html"><i class="ti ti-arrow-left" style="font-size:12px"></i> Back to school website</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:admin@stclare.ac.ke">Forgot password?</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentRole = 'teacher';
+
+    function setRole(role, btn) {
+      currentRole = role;
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    /* ============================================================
+       DEMO CREDENTIALS (replace with real backend authentication)
+       In production connect to Firebase / Supabase / your backend
+       ============================================================ */
+    const DEMO_USERS = {
+      'teacher@stclare.ac.ke':  { password: 'teacher123', role: 'teacher', name: 'Mrs. Wanjiru' },
+      'admin@stclare.ac.ke':    { password: 'admin123',   role: 'admin',   name: 'Dr. Janet Mwangi' },
+      'hod@stclare.ac.ke':      { password: 'hod123',     role: 'hod',     name: 'Mr. Odhiambo' },
+    };
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      const user = DEMO_USERS[email];
+      if (user && user.password === password) {
+        /* Save session */
+        sessionStorage.setItem('sc_user', JSON.stringify({ email, name: user.name, role: user.role }));
+        errorMsg.style.display = 'none';
+        window.location.href = 'analytics.html';
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    });
+
+    /* Redirect if already logged in */
+    if (sessionStorage.getItem('sc_user')) {
+      window.location.href = 'analytics.html';
+    }
+  </script>
+</body>
+</html>

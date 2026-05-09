@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — St.Clare Girls Centre</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar">
+    <div class="logo"><div class="logo-icon">HS</div><div class="logo-text">St.Clare Girls Centre<span>Excellence · Integrity · Service</span></div></div>
+    <button class="hamburger" id="hamburger"><i class="ti ti-menu-2"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="admissions.html">Admissions</a></li>
+      <li><a href="news.html">News & Events</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <h1>Contact Us</h1>
+    <p>We'd love to hear from you. Reach out to our team for admissions queries, general information, or feedback.</p>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="contact-grid">
+
+        <!-- Left: Info -->
+        <div>
+          <div class="contact-info-card">
+            <h3>Get In Touch</h3>
+            <div class="info-row">
+              <i class="ti ti-map-pin info-icon"></i>
+              <div><strong>Address</strong>Off Meru-Maua Road, Meru<br/>P.O Box 196-60200</div>
+            </div>
+            <div class="info-row">
+              <i class="ti ti-phone info-icon"></i>
+              <div><strong>Phone</strong>+254 720 000 456<br/>+254 733 987 000</div>
+            </div>
+            <div class="info-row">
+              <i class="ti ti-mail info-icon"></i>
+              <div><strong>Email</strong>stclare@gmail.com<br/>admissions@stclare.ac.ke</div>
+            </div>
+            <div class="info-row">
+              <i class="ti ti-clock info-icon"></i>
+              <div><strong>Office Hours</strong>Mon – Fri: 7:30 AM – 5:00 PM<br/>Sat: 8:00 AM – 12:00 PM</div>
+            </div>
+          </div>
+          <div class="map-placeholder">
+            <i class="ti ti-map"></i>
+            <p>Off Meru-Maua Road, Meru</p>
+          </div>
+        </div>
+
+        <!-- Right: Form -->
+        <div class="form-card">
+          <h3>Send a Message</h3>
+          <!-- id="contactForm" links this to main.js handler -->
+          <form id="contactForm">
+            <div class="form-group">
+              <label for="name">Full Name *</label>
+              <input type="text" id="name" placeholder="e.g. Jane Otieno" required/>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" placeholder="your@email.com" required/>
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <select id="subject">
+                <option>General Inquiry</option>
+                <option>Admissions</option>
+                <option>Fees & Finance</option>
+                <option>Student Welfare</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message *</label>
+              <textarea id="message" placeholder="Write your message here…" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand"><div class="logo"><div class="logo-icon">HS</div><div class="logo-text" style="color:#fff">St.Clare Girls Centre<span>Excellence · Integrity · Service</span></div></div><p>Providing quality education since 2014. Meru, Kenya.</p></div>
+      <div class="footer-links"><h4>Quick Links</h4><ul><li><a href="../index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="admissions.html">Admissions</a></li><li><a href="news.html">News & Events</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div class="footer-contact"><h4>Contact</h4><p><i class="ti ti-map-pin"></i> Off Meru-Maua Road, Meru</p><p><i class="ti ti-phone"></i> +254 720 123 000</p><p><i class="ti ti-mail"></i> stclare@gmail.com</p></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 St.Clare Girls Centre. All rights reserved.</p></div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

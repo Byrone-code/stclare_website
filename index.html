@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>St.Clare Girls' Centre</title>
+
+  <!-- STEP 1: Google Fonts (loads Playfair Display + DM Sans from internet) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <!-- STEP 2: Tabler Icons (loads icon library from internet) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+
+  <!-- STEP 3: YOUR CSS FILE — path is css/style.css (root → css folder → style.css) -->
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <!-- id="navbar"     → main.js adds scroll shadow to this -->
+  <!-- id="hamburger"  → main.js toggles mobile menu on click -->
+  <!-- id="navLinks"   → main.js adds/removes class "open" on mobile -->
+  <nav class="navbar" id="navbar">
+    <div class="logo">
+      <div class="logo-icon">STC</div>
+      <div class="logo-text">
+        St.Clare Girls' Centre
+        <span>Excellence · Integrity · Service</span>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <i class="ti ti-menu-2"></i>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="admissions.html">Admissions</a></li>
+      <li><a href="news.html">News &amp; Events</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+    </ul>
+  </nav>
+
+  <!-- ==================== HERO SECTION ==================== -->
+  <!-- .hero          → big blue gradient banner (styled in style.css) -->
+  <!-- .hero-content  → centred white text + buttons -->
+  <!-- .hero-shapes   → decorative circles (CSS only, no JS needed) -->
+  <!-- TO EDIT: change the h1, p, and button text below -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Shaping Tomorrow's<br/>Leaders Today</h1>
+      <p>
+        St.Clare Girls' Centreprovides a world-class education in a nurturing
+        environment, empowering students to excel academically and grow as individuals.
+      </p>
+      <div class="hero-cta">
+        <a href="pages/admissions.html" class="btn-primary">Apply Now</a>
+        <a href="pages/about.html" class="btn-outline">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+    </div>
+  </section>
+
+  <!-- ==================== STATS BAR ==================== -->
+  <!-- data-target="1240" → main.js reads this and animates the number -->
+  <!-- counting up from 0 when section scrolls into view              -->
+  <!-- Numbers WITHOUT data-target are static (like 98% and 45+)      -->
+  <section class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" data-target="1240">0</div>
+      <div class="stat-lbl">Students Enrolled</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">85%</div>
+      <div class="stat-lbl">Pass Rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" data-target="62">0</div>
+      <div class="stat-lbl">Teaching Staff</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">10+</div>
+      <div class="stat-lbl">Years of Excellence</div>
+    </div>
+  </section>
+
+  <!-- ==================== WHY CHOOSE US — CARDS ==================== -->
+  <!-- .section     → adds top/bottom padding (defined in style.css)  -->
+  <!-- .container   → centres content with max-width 1100px           -->
+  <!-- .cards-grid  → CSS Grid, auto-fits cards side by side          -->
+  <!-- .card        → white card with hover shadow (from style.css)   -->
+  <!-- ti-school    → icon name from tabler-icons.io — browse 5000+   -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Why Choose St.Clare?</h2>
+        <p class="section-sub">A tradition of academic excellence and holistic development</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon"><i class="ti ti-school" aria-hidden="true"></i></div>
+          <h3>Academic Excellence</h3>
+          <p>Rigorous curriculum aligned with national standards, with top results year after year.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="ti ti-trophy" aria-hidden="true"></i></div>
+          <h3>Sports &amp; Co-curriculars</h3>
+          <p>Over 8 clubs, sports teams, and societies to nurture talent beyond the classroom.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
+          <h3>Experienced Faculty</h3>
+          <p>Dedicated teachers with an average of 12 years experience in secondary education.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="ti ti-certificate" aria-hidden="true"></i></div>
+          <h3>University Pathways</h3>
+          <p>Strong partnerships with leading universities to guide students on their next step.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LATEST NEWS SECTION ==================== -->
+  <!-- IMPORTANT: Cards are NOT written here manually.               -->
+  <!-- js/news.js reads the newsData array and GENERATES the cards   -->
+  <!-- automatically inside <div id="newsGrid">.                     -->
+  <!-- On index.html it shows 3 cards. On news.html it shows ALL.    -->
+  <section class="section bg-pale">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Latest News</h2>
+        <p class="section-sub">Stay up to date with school happenings</p>
+      </div>
+      <!-- news.js injects HTML cards into this div automatically -->
+      <div class="news-grid" id="newsGrid"></div>
+      <div style="text-align:center; margin-top:2rem;">
+        <a href="news.html" class="btn-primary">View All News</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <!-- TO EDIT: Change address, phone, email, and school name -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-icon">STC</div>
+          <div class="logo-text" style="color:#fff">
+            St.Clare Girls' Centre
+            <span>Excellence · Integrity · Service</span>
+          </div>
+        </div>
+        <p>Providing quality education since 2014. Meru, Kenya.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="pages/about.html">About</a></li>
+          <li><a href="pages/admissions.html">Admissions</a></li>
+          <li><a href="pages/news.html">News &amp; Events</a></li>
+          <li><a href="pages/contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h4>Contact</h4>
+        <p><i class="ti ti-map-pin" aria-hidden="true"></i> Off Meru-Maua Road, Meru</p>
+        <p><i class="ti ti-phone" aria-hidden="true"></i> +254 720 123 456</p>
+        <p><i class="ti ti-mail" aria-hidden="true"></i> stclare@gmail.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 St.Clare Girls' Centre. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT LINKS ==================== -->
+  <!-- ALWAYS at the BOTTOM of body — never in <head>            -->
+  <!-- Why? HTML loads top-to-bottom. JS needs the HTML elements  -->
+  <!-- (navbar, newsGrid, etc.) to already exist before running.  -->
+  <!-- Order matters: main.js first, then news.js                 -->
+  <script src="main.js"></script>
+  <script src="news.js"></script>
+
+</body>
+</html>
