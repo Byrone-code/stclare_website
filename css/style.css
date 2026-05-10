@@ -1,5 +1,5 @@
 /* =========================================
-   HIGHLAND SECONDARY SCHOOL — style.css
+   ST.CLARE GIRLS' CENTRE — style.css
    ========================================= */
 
 /* ---------- CSS VARIABLES (Theme) ---------- */
@@ -303,16 +303,3 @@ img { max-width: 100%; display: block; }
   .stats-bar { grid-template-columns:1fr; }
   .hero { padding:4rem 1.5rem 3.5rem; }
 }
-.staff-login-btn {
-  background: var(--accent) !important;
-  color: #1a2e0a !important;
-  padding: 6px 14px !important;
-  border-radius: 20px !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  transition: background .2s !important;
-}
-.staff-login-btn:hover { background: #e0b030 !important; }
