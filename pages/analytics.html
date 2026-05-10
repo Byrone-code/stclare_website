@@ -6,143 +6,852 @@
   <title>Analytics — St.Clare Girls Centre</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
-  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <!-- jsPDF for PDF generation (like Zeraki) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#1a4f8a;--blue-light:#2d72c8;--blue-pale:#e8f0fb;--blue-mid:#b5d4f4;--off-white:#f5f7fc;--text:#0d1a2e;--muted:#5a6e87;--border:#cdd8ea;--accent:#f0c040;--red:#a32d2d;--green:#3B6D11;--green-bg:#eaf3de;--amber:#854F0B;--amber-bg:#faeeda;}
+    body{font-family:'DM Sans',sans-serif;background:var(--off-white);color:var(--text);display:flex;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:230px;background:var(--blue);flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .sb-logo{padding:1.1rem 1rem;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:9px;}
+    .sb-icon{width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:13px;color:#1a2e0a;flex-shrink:0;}
+    .sb-logo span{color:#fff;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;line-height:1.3;}
+    .sb-user{padding:.7rem 1rem;font-size:.78rem;color:rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.1);}
+    .sb-user strong{display:block;color:#fff;font-size:.85rem;margin-bottom:2px;}
+    .sb-badge{background:var(--accent);color:#1a2e0a;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:500;}
+    .sb-nav{padding:.5rem 0;flex:1;}
+    .sb-section{font-size:.65rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.35);padding:.75rem 1rem .3rem;}
+    .sb-nav a{display:flex;align-items:center;gap:9px;padding:9px 1rem;color:rgba(255,255,255,.75);font-size:.84rem;transition:all .2s;cursor:pointer;text-decoration:none;}
+    .sb-nav a:hover,.sb-nav a.active{background:rgba(255,255,255,.15);color:#fff;}
+    .sb-nav a i{font-size:16px;flex-shrink:0;}
+    .sb-logout{padding:.85rem 1rem;border-top:1px solid rgba(255,255,255,.1);}
+    .sb-logout button{width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px;border-radius:8px;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+    .sb-logout button:hover{background:rgba(255,255,255,.2);}
+
+    /* MAIN */
+    .main{flex:1;overflow-x:hidden;min-width:0;}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:10px;flex-wrap:wrap;}
+    .topbar h2{font-size:1rem;font-weight:500;}
+    .topbar-btns{display:flex;gap:8px;flex-wrap:wrap;}
+    .btn{padding:7px 14px;border-radius:7px;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:all .2s;border:none;white-space:nowrap;}
+    .btn-primary{background:var(--blue);color:#fff;}
+    .btn-primary:hover{background:var(--blue-light);}
+    .btn-success{background:var(--green);color:#fff;}
+    .btn-success:hover{opacity:.9;}
+    .btn-amber{background:#EF9F27;color:#1a2e0a;}
+    .btn-amber:hover{opacity:.9;}
+    .btn-outline{background:#fff;color:var(--blue);border:1px solid var(--border);}
+    .btn-outline:hover{background:var(--blue-pale);}
+    .btn-red{background:var(--red);color:#fff;}
+
+    /* PANELS */
+    .panel{display:none;padding:1.5rem;}
+    .panel.active{display:block;}
+
+    /* METRICS */
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:1.25rem;}
+    .mcard{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.1rem;}
+    .mcard i{font-size:20px;color:var(--blue-light);display:block;margin-bottom:.5rem;}
+    .mval{font-size:1.7rem;font-weight:600;font-family:'Playfair Display',serif;color:var(--blue);}
+    .mlbl{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .mchg{font-size:.72rem;margin-top:4px;font-weight:500;}
+    .up{color:var(--green);} .dn{color:var(--red);}
+
+    /* FILTER BAR */
+    .fbar{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.25rem;}
+    .fg{display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:120px;}
+    .fg label{font-size:.76rem;color:var(--muted);}
+    .fg select,.fg input{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.84rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff;}
+    .fg select:focus,.fg input:focus{border-color:var(--blue-light);}
+
+    /* TABLE */
+    .tcard{background:#fff;border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1.25rem;}
+    .thead{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    .thead h3{font-size:.95rem;font-weight:500;}
+    .rtable{width:100%;border-collapse:collapse;font-size:.83rem;min-width:600px;}
+    .rtable th{background:var(--blue-pale);color:var(--blue);padding:9px 14px;text-align:left;font-weight:500;font-size:.77rem;white-space:nowrap;}
+    .rtable td{padding:9px 14px;border-top:0.5px solid var(--border);white-space:nowrap;}
+    .rtable tr:hover td{background:var(--off-white);}
+    .rtable-wrap{overflow-x:auto;}
+
+    /* GRADE PILLS */
+    .gp{font-size:.71rem;padding:2px 9px;border-radius:20px;font-weight:500;display:inline-block;}
+    .ga{background:var(--green-bg);color:var(--green);}
+    .gb{background:var(--blue-pale);color:var(--blue);}
+    .gc{background:var(--amber-bg);color:var(--amber);}
+    .gd{background:#fcebeb;color:var(--red);}
+
+    /* UPLOAD ZONE */
+    .upload-zone{background:#fff;border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1.25rem;}
+    .upload-zone:hover{border-color:var(--blue-light);background:var(--blue-pale);}
+    .upload-zone input[type=file]{display:none;}
+    .upload-zone i{font-size:2.5rem;color:var(--blue-light);display:block;margin-bottom:.75rem;}
+
+    /* CHARTS */
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.25rem;}
+    .chart-card{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;}
+    .chart-card h4{font-size:.87rem;font-weight:500;color:var(--muted);margin-bottom:.9rem;}
+    .barchart{display:flex;align-items:flex-end;gap:6px;height:110px;}
+    .bw{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
+    .bar{border-radius:4px 4px 0 0;width:100%;cursor:pointer;transition:opacity .2s;}
+    .bar:hover{opacity:.75;}
+    .bval{font-size:.66rem;color:var(--blue);font-weight:500;}
+    .blbl{font-size:.66rem;color:var(--muted);text-align:center;}
+
+    /* TABS */
+    .tab-row{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap;}
+    .tab-btn{padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-size:.82rem;cursor:pointer;background:#fff;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s;}
+    .tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+    /* CARDS GRID */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:1.25rem;}
+    .dcard{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:1.25rem;cursor:pointer;transition:box-shadow .2s;}
+    .dcard:hover{box-shadow:0 4px 16px rgba(26,79,138,.1);}
+    .dcard i{font-size:22px;color:var(--blue-light);display:block;margin-bottom:.7rem;}
+    .dcard h3{font-size:.95rem;font-weight:500;margin-bottom:.3rem;}
+    .dcard p{font-size:.83rem;color:var(--muted);line-height:1.55;}
+
+    /* SUBJECT PILL */
+    .spill{font-size:.7rem;padding:2px 8px;border-radius:10px;background:var(--blue-pale);color:var(--blue);font-weight:500;display:inline-block;}
+
+    /* PROGRESS BAR */
+    .pbar-wrap{margin-bottom:.6rem;}
+    .pbar-label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.25rem;}
+    .pbar{height:8px;background:#e8f0fb;border-radius:4px;overflow:hidden;}
+    .pbar-fill{height:100%;border-radius:4px;background:var(--blue-light);transition:width .6s;}
+
+    /* PRINT */
+    @media print{
+      .sidebar,.topbar,.topbar-btns,.btn,.fbar,.tab-row,.upload-zone,.sb-logout{display:none!important;}
+      .panel.active{display:block!important;padding:0;}
+      .tcard{border:1px solid #ccc;}
+      body{background:#fff;}
+    }
+
+    @media(max-width:768px){
+      .sidebar{display:none;}
+      .charts-row{grid-template-columns:1fr;}
+      .metrics{grid-template-columns:repeat(2,1fr);}
+    }
+  </style>
 </head>
 <body>
 
-  <nav class="navbar" id="navbar">
-    <div class="logo"><div class="logo-icon">STC</div><div class="logo-text">St.Clare Girls Centre<span>Excellence · Integrity · Service</span></div></div>
-    <button class="hamburger" id="hamburger"><i class="ti ti-menu-2"></i></button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="../index.html">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="admissions.html">Admissions</a></li>
-      <li><a href="news.html">News & Events</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li><a href="analytics.html" class="active">Analytics</a></li>
-    </ul>
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-icon">STC</div>
+    <span>St.Clare Girls Centre<br/>School</span>
+  </div>
+  <div class="sb-user">
+    <strong id="sbName">Loading...</strong>
+    <span class="sb-badge" id="sbRole">Teacher</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <a class="active" onclick="showPanel('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+    <a onclick="showPanel('upload',this)"><i class="ti ti-upload"></i>Upload Marks</a>
+    <a onclick="showPanel('manual',this)"><i class="ti ti-keyboard"></i>Enter Marks</a>
+
+    <div class="sb-section">CBC Curriculum</div>
+    <a onclick="showPanel('cbc_lower',this)"><i class="ti ti-school"></i>Grade 1–6 (Lower)</a>
+    <a onclick="showPanel('cbc_junior',this)"><i class="ti ti-books"></i>Grade 7–9 (Junior)</a>
+    <a onclick="showPanel('cbc_senior',this)"><i class="ti ti-certificate"></i>Grade 10–11 (Senior)</a>
+
+    <div class="sb-section">8-4-4 Curriculum</div>
+    <a onclick="showPanel('form34',this)"><i class="ti ti-clipboard-list"></i>Form 3 &amp; 4</a>
+
+    <div class="sb-section">Analysis &amp; Reports</div>
+    <a onclick="showPanel('ranking',this)"><i class="ti ti-trophy"></i>Class Rankings</a>
+    <a onclick="showPanel('subject',this)"><i class="ti ti-chart-bar"></i>Subject Analysis</a>
+    <a onclick="showPanel('reports',this)"><i class="ti ti-file-analytics"></i>Download Reports</a>
   </nav>
+  <div class="sb-logout">
+    <button onclick="doLogout()"><i class="ti ti-logout" style="margin-right:6px"></i>Sign Out</button>
+  </div>
+</aside>
 
-  <section class="section">
-    <div class="container">
+<!-- ========== MAIN ========== -->
+<div class="main">
 
-      <!-- Dashboard header -->
-      <div class="analytics-header">
-        <h2>School Analytics Dashboard</h2>
-        <p>Academic Year 2025/26 &bull; Term 2 Overview &bull; Last updated: May 6, 2026</p>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <h2 id="panelTitle">Dashboard</h2>
+    <div class="topbar-btns">
+      <button class="btn btn-outline" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>
+      <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+      <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>Download PDF</button>
+      <button class="btn btn-primary" onclick="showPanel('upload',null)"><i class="ti ti-upload"></i>Upload Marks</button>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="metrics">
+      <div class="mcard"><i class="ti ti-users"></i><div class="mval">1,240</div><div class="mlbl">Total Students</div><div class="mchg up">↑ CBC: 920 | 8-4-4: 320</div></div>
+      <div class="mcard"><i class="ti ti-school"></i><div class="mval">13</div><div class="mlbl">Grade Levels</div><div class="mchg up">Gr 1–11 + Form 3&amp;4</div></div>
+      <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval" id="schoolMean">78%</div><div class="mlbl">School Mean Score</div><div class="mchg up">↑ +4% from last term</div></div>
+      <div class="mcard"><i class="ti ti-award"></i><div class="mval">94%</div><div class="mlbl">Pass Rate</div><div class="mchg up">↑ +2% this term</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h4>Mean score by grade — this term</h4>
+        <div class="barchart">
+          <div class="bw"><div class="bval">82%</div><div class="bar" style="height:82%;background:#2d72c8"></div><div class="blbl">Gr1</div></div>
+          <div class="bw"><div class="bval">79%</div><div class="bar" style="height:79%;background:#2d72c8"></div><div class="blbl">Gr2</div></div>
+          <div class="bw"><div class="bval">75%</div><div class="bar" style="height:75%;background:#2d72c8"></div><div class="blbl">Gr3</div></div>
+          <div class="bw"><div class="bval">80%</div><div class="bar" style="height:80%;background:#2d72c8"></div><div class="blbl">Gr4</div></div>
+          <div class="bw"><div class="bval">83%</div><div class="bar" style="height:83%;background:#1a4f8a"></div><div class="blbl">Gr6</div></div>
+          <div class="bw"><div class="bval">71%</div><div class="bar" style="height:71%;background:#1D9E75"></div><div class="blbl">Gr7</div></div>
+          <div class="bw"><div class="bval">74%</div><div class="bar" style="height:74%;background:#1D9E75"></div><div class="blbl">Gr9</div></div>
+          <div class="bw"><div class="bval">76%</div><div class="bar" style="height:76%;background:#EF9F27"></div><div class="blbl">F3</div></div>
+          <div class="bw"><div class="bval">72%</div><div class="bar" style="height:72%;background:#EF9F27"></div><div class="blbl">F4</div></div>
+        </div>
       </div>
-
-      <!-- Metric cards -->
-      <div class="metrics">
-        <div class="metric">
-          <div class="metric-val" data-target="1240">0</div>
-          <div class="metric-lbl">Total Students</div>
-          <div class="metric-change up">↑ +48 this term</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val">85%</div>
-          <div class="metric-lbl">Exam Pass Rate</div>
-          <div class="metric-change up">↑ +2% vs last year</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val">85%</div>
-          <div class="metric-lbl">Attendance Rate</div>
-          <div class="metric-change up">↑ +1.2%</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val" data-target="62">0</div>
-          <div class="metric-lbl">Teaching Staff</div>
-          <div class="metric-change up">↑ 4 new hires</div>
-        </div>
-      </div>
-
-      <!-- Charts row -->
-      <div class="charts-row">
-        <!-- Enrolment by form bar chart -->
-        <div class="chart-box">
-          <h4>Enrolment by form</h4>
-          <div class="bar-chart">
-            <div class="bar-wrap"><div class="bar-val">320</div><div class="bar" style="height:100%"></div><div class="bar-lbl">Grade 9</div></div>
-            <div class="bar-wrap"><div class="bar-val">310</div><div class="bar" style="height:97%"></div><div class="bar-lbl">Grade 10</div></div>
-            <div class="bar-wrap"><div class="bar-val">315</div><div class="bar" style="height:98%"></div><div class="bar-lbl">Form 3</div></div>
-            <div class="bar-wrap"><div class="bar-val">295</div><div class="bar" style="height:92%"></div><div class="bar-lbl">Form 4</div></div>
-          </div>
-        </div>
-
-        <!-- Gender donut chart (SVG) -->
-        <div class="chart-box">
-          <h4>Students by gender</h4>
-          <div style="display:flex; align-items:center; gap:1rem;">
-            <svg width="90" height="90" viewBox="0 0 90 90" aria-label="Gender breakdown pie chart">
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#e8f0fb" stroke-width="14"/>
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#1a4f8a" stroke-width="14"
-                stroke-dasharray="131 88" stroke-dashoffset="-22" transform="rotate(-90 45 45)"/>
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#f0c040" stroke-width="14"
-                stroke-dasharray="88 131" stroke-dashoffset="-153" transform="rotate(-90 45 45)"/>
-              <text x="45" y="49" text-anchor="middle" font-size="11" font-weight="600"
-                fill="#1a4f8a" font-family="DM Sans,sans-serif">400</text>
-            </svg>
-            <div>
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:.5rem;font-size:.85rem;color:var(--muted)">
-                <div style="width:10px;height:10px;border-radius:50%;background:#1a4f8a"></div>Male: 0 (0%)
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted)">
-                <div style="width:10px;height:10px;border-radius:50%;background:#f0c040"></div>Female: 400 (100%)
-              </div>
-            </div>
+      <div class="chart-card">
+        <h4>Grade distribution — all students</h4>
+        <div style="display:flex;align-items:center;gap:1.25rem;margin-top:.5rem">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="35" fill="none" stroke="#e8f0fb" stroke-width="14"/>
+            <circle cx="45" cy="45" r="35" fill="none" stroke="#3B6D11" stroke-width="14" stroke-dasharray="88 132" stroke-dashoffset="-22" transform="rotate(-90 45 45)"/>
+            <circle cx="45" cy="45" r="35" fill="none" stroke="#2d72c8" stroke-width="14" stroke-dasharray="62 158" stroke-dashoffset="-110" transform="rotate(-90 45 45)"/>
+            <circle cx="45" cy="45" r="35" fill="none" stroke="#EF9F27" stroke-width="14" stroke-dasharray="28 192" stroke-dashoffset="-172" transform="rotate(-90 45 45)"/>
+            <circle cx="45" cy="45" r="35" fill="none" stroke="#a32d2d" stroke-width="14" stroke-dasharray="14 206" stroke-dashoffset="-200" transform="rotate(-90 45 45)"/>
+            <text x="45" y="49" text-anchor="middle" font-size="11" font-weight="600" fill="#1a4f8a" font-family="DM Sans,sans-serif">1240</text>
+          </svg>
+          <div style="font-size:.79rem;display:flex;flex-direction:column;gap:6px;color:#5a6e87">
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:#3B6D11"></div>A — Excellent: 40%</div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:#2d72c8"></div>B — Good: 27%</div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:#EF9F27"></div>C — Average: 13%</div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:#a32d2d"></div>D — Below: 7%</div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Subject scores bar chart -->
-      <div class="chart-box" style="margin-bottom:1.5rem">
-        <h4>Subject average scores — Term 2 Mock Exams</h4>
-        <div class="bar-chart" style="height:120px; margin-top:.5rem">
-          <div class="bar-wrap"><div class="bar-val">78%</div><div class="bar" style="height:78%;background:#2d72c8"></div><div class="bar-lbl">Maths</div></div>
-          <div class="bar-wrap"><div class="bar-val">82%</div><div class="bar" style="height:82%;background:#2d72c8"></div><div class="bar-lbl">English</div></div>
-          <div class="bar-wrap"><div class="bar-val">74%</div><div class="bar" style="height:74%;background:#2d72c8"></div><div class="bar-lbl">Science</div></div>
-          <div class="bar-wrap"><div class="bar-val">88%</div><div class="bar" style="height:88%;background:#2d72c8"></div><div class="bar-lbl">Kiswahili</div></div>
-          <div class="bar-wrap"><div class="bar-val">70%</div><div class="bar" style="height:70%;background:#2d72c8"></div><div class="bar-lbl">History</div></div>
-          <div class="bar-wrap"><div class="bar-val">76%</div><div class="bar" style="height:76%;background:#2d72c8"></div><div class="bar-lbl">Geography</div></div>
-          <div class="bar-wrap"><div class="bar-val">84%</div><div class="bar" style="height:84%;background:#2d72c8"></div><div class="bar-lbl">CRE</div></div>
+    <div class="tcard">
+      <div class="thead"><h3>Top performing students — this term</h3><span style="font-size:.8rem;color:var(--muted)">All grades</span></div>
+      <div class="rtable-wrap"><table class="rtable" id="dashTopTable">
+        <thead><tr><th>#</th><th>Student Name</th><th>Adm No.</th><th>Grade/Form</th><th>Mean Score</th><th>Grade</th><th>Trend</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Aisha Wanjiku</td><td>SC/001</td><td>Grade 11</td><td>96%</td><td><span class="gp ga">A</span></td><td class="up">↑ +3</td></tr>
+          <tr><td>2</td><td>Clara Otieno</td><td>SC/045</td><td>Form 4</td><td>94%</td><td><span class="gp ga">A</span></td><td class="up">↑ +5</td></tr>
+          <tr><td>3</td><td>Faith Njeri</td><td>SC/012</td><td>Grade 11</td><td>92%</td><td><span class="gp ga">A</span></td><td class="up">↑ +2</td></tr>
+          <tr><td>4</td><td>Grace Kamau</td><td>SC/088</td><td>Form 4</td><td>91%</td><td><span class="gp ga">A</span></td><td>→ 0</td></tr>
+          <tr><td>5</td><td>Hope Mwenda</td><td>SC/033</td><td>Grade 10</td><td>89%</td><td><span class="gp ga">A</span></td><td class="up">↑ +4</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== UPLOAD MARKS ===== -->
+  <div class="panel" id="panel-upload">
+    <div class="fbar">
+      <div class="fg"><label>Curriculum</label>
+        <select id="upCurr" onchange="updateSubjects()">
+          <option value="cbc">CBC</option><option value="844">8-4-4</option>
+        </select>
+      </div>
+      <div class="fg"><label>Grade / Form</label><select id="upGrade" onchange="updateSubjects()"></select></div>
+      <div class="fg"><label>Subject</label><select id="upSubject"></select></div>
+      <div class="fg"><label>Term</label>
+        <select><option>Term 1 — 2025</option><option>Term 2 — 2025</option><option>Term 3 — 2025</option></select>
+      </div>
+      <div class="fg"><label>Exam Type</label>
+        <select><option>End Term</option><option>Mid Term</option><option>CAT</option><option>KCSE Mock 1</option><option>KCSE Mock 2</option></select>
+      </div>
+      <div class="fg" style="justify-content:flex-end">
+        <button class="btn btn-outline" onclick="dlTemplate()"><i class="ti ti-download"></i>CSV Template</button>
+      </div>
+    </div>
+
+    <label for="fileIn">
+      <div class="upload-zone">
+        <i class="ti ti-file-spreadsheet"></i>
+        <h3 style="font-size:1rem;font-weight:500;margin-bottom:.3rem">Upload marks spreadsheet</h3>
+        <p style="font-size:.85rem;color:#5a6e87">Drag &amp; drop your CSV or Excel file, or click to browse</p>
+        <p style="font-size:.78rem;color:#2d72c8;margin-top:.5rem">Download the CSV template above first</p>
+        <input type="file" id="fileIn" accept=".csv,.xlsx,.xls" onchange="handleUpload(this)"/>
+      </div>
+    </label>
+
+    <div class="tcard" id="uploadPreview" style="display:none">
+      <div class="thead">
+        <h3>Upload preview — <span id="previewLabel">0 students</span></h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>Download PDF</button>
+          <button class="btn btn-primary" onclick="runAnalysis()"><i class="ti ti-chart-bar"></i>Analyze Results</button>
         </div>
       </div>
+      <div class="rtable-wrap"><table class="rtable">
+        <thead><tr><th>#</th><th>Student Name</th><th>Adm No.</th><th>Score</th><th>Grade</th><th>Remarks</th></tr></thead>
+        <tbody id="previewBody"></tbody>
+      </table></div>
+    </div>
+  </div>
 
-      <!-- Student status table -->
-      <div class="recent-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Form</th>
-              <th>Attendance</th>
-              <th>Mock Score</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Millicent Kanana</td><td>Form 4</td><td>97%</td><td>84%</td><td><span class="status-pill pill-pass">On Track</span></td></tr>
-            <tr><td>Emily Njeri</td><td>Form 3</td><td>88%</td><td>68%</td><td><span class="status-pill pill-pend">Needs Support</span></td></tr>
-            <tr><td>Monicah Kawera</td><td>Grade 10</td><td>99%</td><td>91%</td><td><span class="status-pill pill-pass">On Track</span></td></tr>
-            <tr><td>Glory Gatumi</td><td>Grade 9</td><td>72%</td><td>55%</td><td><span class="status-pill pill-fail">At Risk</span></td></tr>
-            <tr><td>Tabitha Wanjohi</td><td>Grade 9</td><td>95%</td><td>79%</td><td><span class="status-pill pill-pass">On Track</span></td></tr>
-            <tr><td>Agnes Nadoudou</td><td>Form 3</td><td>90%</td><td>72%</td><td><span class="status-pill pill-pend">Needs Support</span></td></tr>
-          </tbody>
-        </table>
+  <!-- ===== MANUAL ENTRY ===== -->
+  <div class="panel" id="panel-manual">
+    <div class="fbar">
+      <div class="fg"><label>Curriculum</label>
+        <select id="manCurr" onchange="updateManSubjects()">
+          <option value="cbc">CBC</option><option value="844">8-4-4</option>
+        </select>
       </div>
-
+      <div class="fg"><label>Grade / Form</label><select id="manGrade" onchange="updateManSubjects()"></select></div>
+      <div class="fg"><label>Subject</label><select id="manSubject"></select></div>
+      <div class="fg"><label>Out of</label><input type="number" id="maxMark" value="100" min="1" max="500" style="width:80px"/></div>
+      <div class="fg"><label>Term</label><select><option>Term 1 — 2025</option><option>Term 2 — 2025</option><option>Term 3 — 2025</option></select></div>
     </div>
-  </section>
 
-  <footer class="footer">
-    <div class="container footer-inner">
-      <div class="footer-brand"><div class="logo"><div class="logo-icon">STC</div><div class="logo-text" style="color:#fff">St.Clare Girls Centre<span>Excellence · Integrity · Service</span></div></div><p>Providing quality education since 2014.Meru, Kenya.</p></div>
-      <div class="footer-links"><h4>Quick Links</h4><ul><li><a href="../index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="admissions.html">Admissions</a></li><li><a href="news.html">News & Events</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-      <div class="footer-contact"><h4>Contact</h4><p><i class="ti ti-map-pin"></i> Off Meru-Maua, Meru</p><p><i class="ti ti-phone"></i> +254 720 123 456</p><p><i class="ti ti-mail"></i> stclaregirls@gmail.com</p></div>
+    <div class="tcard">
+      <div class="thead">
+        <h3>Enter student marks</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="addRow()"><i class="ti ti-plus"></i>Add Student</button>
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>Download PDF</button>
+          <button class="btn btn-primary" onclick="runAnalysis()"><i class="ti ti-chart-bar"></i>Analyze</button>
+        </div>
+      </div>
+      <div class="rtable-wrap"><table class="rtable" id="manTable">
+        <thead><tr><th>#</th><th>Student Name</th><th>Adm No.</th><th>Score</th><th>Auto Grade</th><th>Remarks</th><th></th></tr></thead>
+        <tbody id="manBody"></tbody>
+      </table></div>
+      <div style="padding:.85rem 1.25rem">
+        <button class="btn btn-outline" onclick="addRow()"><i class="ti ti-plus"></i>Add Another Student</button>
+      </div>
     </div>
-    <div class="footer-bottom"><p>&copy; 2026 St.Clare Girls Centre. All rights reserved.</p></div>
-  </footer>
 
-  <script src="../js/main.js"></script>
+    <!-- Analysis result section -->
+    <div class="tcard" id="analysisResult" style="display:none">
+      <div class="thead"><h3>Analysis Results</h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>Download Full PDF Report</button>
+        </div>
+      </div>
+      <div style="padding:1.25rem">
+        <div class="metrics" style="margin-bottom:1.25rem" id="analysisMetrics"></div>
+        <div style="margin-bottom:1rem">
+          <h4 style="font-size:.88rem;font-weight:500;color:var(--muted);margin-bottom:.75rem">Grade distribution</h4>
+          <div id="gradeDistBars"></div>
+        </div>
+      </div>
+      <div class="rtable-wrap"><table class="rtable" id="analysisTable">
+        <thead><tr><th>#</th><th>Student Name</th><th>Adm No.</th><th>Score</th><th>Percentage</th><th>Grade</th><th>Remarks</th></tr></thead>
+        <tbody id="analysisBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== CBC LOWER (GR 1–6) ===== -->
+  <div class="panel" id="panel-cbc_lower">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="setTab(this)">Grade 1</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 2</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 3</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 4</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 5</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 6</button>
+    </div>
+    <div class="metrics">
+      <div class="mcard"><i class="ti ti-users"></i><div class="mval">68</div><div class="mlbl">Students — Grade 1</div></div>
+      <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval">82%</div><div class="mlbl">Class Mean</div></div>
+      <div class="mcard"><i class="ti ti-award"></i><div class="mval">Aisha M.</div><div class="mlbl">Top Student</div></div>
+      <div class="mcard"><i class="ti ti-books"></i><div class="mval">7</div><div class="mlbl">Learning Areas</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thead">
+        <h3>Grade 1 — CBC Learning Areas <span class="spill">CBC Lower Primary</span></h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>PDF Report</button>
+        </div>
+      </div>
+      <div class="rtable-wrap"><table class="rtable" id="cbcLowerTable">
+        <thead><tr><th>Student</th><th>Literacy</th><th>Numeracy</th><th>Environ.</th><th>Creative Arts</th><th>Religious Ed.</th><th>Movement</th><th>Mean</th><th>Grade</th></tr></thead>
+        <tbody>
+          <tr><td>Aisha Mwenda</td><td>88</td><td>92</td><td>85</td><td>90</td><td>87</td><td>91</td><td><strong>89%</strong></td><td><span class="gp ga">A</span></td></tr>
+          <tr><td>Brenda Atieno</td><td>76</td><td>81</td><td>79</td><td>74</td><td>80</td><td>77</td><td><strong>78%</strong></td><td><span class="gp gb">B</span></td></tr>
+          <tr><td>Cynthia Kamau</td><td>65</td><td>70</td><td>68</td><td>72</td><td>67</td><td>69</td><td><strong>69%</strong></td><td><span class="gp gc">C</span></td></tr>
+          <tr><td>Diana Njoroge</td><td>91</td><td>88</td><td>93</td><td>89</td><td>92</td><td>94</td><td><strong>91%</strong></td><td><span class="gp ga">A</span></td></tr>
+          <tr><td>Esther Wanjiru</td><td>55</td><td>60</td><td>58</td><td>62</td><td>54</td><td>57</td><td><strong>58%</strong></td><td><span class="gp gd">D</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== CBC JUNIOR (GR 7–9) ===== -->
+  <div class="panel" id="panel-cbc_junior">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="setTab(this)">Grade 7</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 8</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 9</button>
+    </div>
+    <div class="metrics">
+      <div class="mcard"><i class="ti ti-users"></i><div class="mval">74</div><div class="mlbl">Students — Grade 7</div></div>
+      <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval">71%</div><div class="mlbl">Class Mean</div></div>
+      <div class="mcard"><i class="ti ti-trophy"></i><div class="mval">Grace K.</div><div class="mlbl">Top Student</div></div>
+      <div class="mcard"><i class="ti ti-books"></i><div class="mval">10</div><div class="mlbl">Subjects</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thead">
+        <h3>Grade 7 — Junior Secondary <span class="spill">CBC Junior</span></h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>PDF Report</button>
+        </div>
+      </div>
+      <div class="rtable-wrap"><table class="rtable" id="cbcJuniorTable">
+        <thead><tr><th>Student</th><th>English</th><th>Kiswahili</th><th>Maths</th><th>Integ. Sci.</th><th>Social Std.</th><th>CRE</th><th>Pre-Tech</th><th>Mean</th><th>Grade</th></tr></thead>
+        <tbody>
+          <tr><td>Grace Kamau</td><td>85</td><td>82</td><td>90</td><td>88</td><td>84</td><td>87</td><td>83</td><td><strong>86%</strong></td><td><span class="gp ga">A</span></td></tr>
+          <tr><td>Hope Wanjiru</td><td>74</td><td>71</td><td>68</td><td>75</td><td>77</td><td>79</td><td>72</td><td><strong>74%</strong></td><td><span class="gp gb">B</span></td></tr>
+          <tr><td>Joy   Wangeci</td><td>60</td><td>65</td><td>55</td><td>62</td><td>68</td><td>70</td><td>58</td><td><strong>63%</strong></td><td><span class="gp gc">C</span></td></tr>
+          <tr><td>Joyce Mwangi</td><td>90</td><td>88</td><td>92</td><td>91</td><td>89</td><td>93</td><td>87</td><td><strong>90%</strong></td><td><span class="gp ga">A</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== CBC SENIOR (GR 10–11) ===== -->
+  <div class="panel" id="panel-cbc_senior">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="setTab(this)">Grade 10</button>
+      <button class="tab-btn" onclick="setTab(this)">Grade 11</button>
+    </div>
+    <div class="metrics">
+      <div class="mcard"><i class="ti ti-users"></i><div class="mval">62</div><div class="mlbl">Students — Grade 10</div></div>
+      <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval">76%</div><div class="mlbl">Class Mean</div></div>
+      <div class="mcard"><i class="ti ti-trophy"></i><div class="mval">Aisha W.</div><div class="mlbl">Top Student</div></div>
+      <div class="mcard"><i class="ti ti-books"></i><div class="mval">6</div><div class="mlbl">Pathway Subjects</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thead">
+        <h3>Grade 10 — Senior Secondary <span class="spill">CBC Senior</span></h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>PDF Report</button>
+        </div>
+      </div>
+      <div class="rtable-wrap"><table class="rtable" id="cbcSeniorTable">
+        <thead><tr><th>Student</th><th>English</th><th>Kiswahili</th><th>Maths</th><th>Biology</th><th>Chemistry</th><th>Physics</th><th>Mean</th><th>Grade</th></tr></thead>
+        <tbody>
+          <tr><td>Shrleen Gakii</td><td>92</td><td>88</td><td>96</td><td>94</td><td>91</td><td>89</td><td><strong>92%</strong></td><td><span class="gp ga">A</span></td></tr>
+          <tr><td>Monicah Kawera</td><td>78</td><td>80</td><td>74</td><td>82</td><td>76</td><td>71</td><td><strong>77%</strong></td><td><span class="gp gb">B</span></td></tr>
+          <tr><td>Joyce Naing'erua</td><td>65</td><td>70</td><td>62</td><td>68</td><td>64</td><td>61</td><td><strong>65%</strong></td><td><span class="gp gc">C</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== FORM 3 & 4 (8-4-4) ===== -->
+  <div class="panel" id="panel-form34">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="setTab(this)">Form 3</button>
+      <button class="tab-btn" onclick="setTab(this)">Form 4</button>
+    </div>
+    <div class="fbar">
+      <div class="fg"><label>Stream</label><select><option>4A</option><option>4B</option><option>4C</option></select></div>
+      <div class="fg"><label>Subject</label><select><option>All Subjects</option><option>Mathematics</option><option>English</option><option>Biology</option><option>Chemistry</option><option>Physics</option><option>History</option><option>Geography</option><option>CRE</option><option>Kiswahili</option></select></div>
+      <div class="fg"><label>Exam</label><select><option>End Term 2 — 2025</option><option>KCSE Mock 1</option><option>KCSE Mock 2</option></select></div>
+    </div>
+    <div class="metrics">
+      <div class="mcard"><i class="ti ti-users"></i><div class="mval">110</div><div class="mlbl">Form 3 &amp; 4 Students</div></div>
+      <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval">B+</div><div class="mlbl">Mean Grade</div></div>
+      <div class="mcard"><i class="ti ti-trophy"></i><div class="mval">Clara O.</div><div class="mlbl">Top Student</div></div>
+      <div class="mcard"><i class="ti ti-certificate"></i><div class="mval">KCSE</div><div class="mlbl">Curriculum</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thead">
+        <h3>Form 4 — KCSE Mock Results <span class="spill">8-4-4</span></h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+          <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>PDF Report</button>
+        </div>
+      </div>
+      <div class="rtable-wrap"><table class="rtable" id="form34Table">
+        <thead><tr><th>#</th><th>Student</th><th>Eng</th><th>Kisw</th><th>Maths</th><th>Bio</th><th>Chem</th><th>Phys</th><th>Hist</th><th>Geo</th><th>Mean</th><th>Grade</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Clara Atieno</td><td>A</td><td>A-</td><td>A</td><td>A</td><td>A-</td><td>B+</td><td>A-</td><td>A</td><td><strong>A-</strong></td><td><span class="gp ga">A-</span></td></tr>
+          <tr><td>2</td><td>Grace Kamau</td><td>B+</td><td>A</td><td>B+</td><td>A-</td><td>B+</td><td>B</td><td>A</td><td>A-</td><td><strong>B+</strong></td><td><span class="gp gb">B+</span></td></tr>
+          <tr><td>3</td><td>Hope Mwenda</td><td>B</td><td>B+</td><td>B</td><td>B+</td><td>B</td><td>B-</td><td>B+</td><td>B</td><td><strong>B</strong></td><td><span class="gp gb">B</span></td></tr>
+          <tr><td>4</td><td>Joy Njoroge</td><td>C+</td><td>B</td><td>C</td><td>B-</td><td>C+</td><td>C</td><td>B</td><td>C+</td><td><strong>C+</strong></td><td><span class="gp gc">C+</span></td></tr>
+          <tr><td>5</td><td>Jane Achieng</td><td>C</td><td>C+</td><td>D+</td><td>C</td><td>C-</td><td>D+</td><td>C+</td><td>C</td><td><strong>C</strong></td><td><span class="gp gc">C</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== RANKINGS ===== -->
+  <div class="panel" id="panel-ranking">
+    <div class="fbar">
+      <div class="fg"><label>Grade/Form</label><select><option>All</option><option>Grade 6</option><option>Grade 9</option><option>Grade 11</option><option>Form 3</option><option>Form 4</option></select></div>
+      <div class="fg"><label>Term</label><select><option>Term 2 — 2025</option><option>Term 1 — 2025</option></select></div>
+      <div class="fg" style="justify-content:flex-end">
+        <button class="btn btn-amber" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i>Export CSV</button>
+        <button class="btn btn-success" onclick="downloadPDF()"><i class="ti ti-file-text"></i>PDF Rankings</button>
+      </div>
+    </div>
+    <div class="tcard">
+      <div class="thead"><h3>School-wide rankings — Term 2 2025</h3><span style="font-size:.8rem;color:var(--muted)">All grades</span></div>
+      <div class="rtable-wrap"><table class="rtable" id="rankTable">
+        <thead><tr><th>Rank</th><th>Student Name</th><th>Adm No.</th><th>Grade/Form</th><th>Mean Score</th><th>Grade</th><th>vs Last Term</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1</strong></td><td>Aisha Wanjiku</td><td>HS/001</td><td>Grade 11</td><td>96%</td><td><span class="gp ga">A</span></td><td class="up">↑ +2</td></tr>
+          <tr><td><strong>2</strong></td><td>Clara Otieno</td><td>HS/045</td><td>Form 4</td><td>94%</td><td><span class="gp ga">A</span></td><td class="up">↑ +5</td></tr>
+          <tr><td><strong>3</strong></td><td>Faith Njeri</td><td>HS/012</td><td>Grade 11</td><td>92%</td><td><span class="gp ga">A</span></td><td class="up">↑ +1</td></tr>
+          <tr><td><strong>4</strong></td><td>Grace Kamau</td><td>HS/088</td><td>Form 4</td><td>91%</td><td><span class="gp ga">A</span></td><td>→ 0</td></tr>
+          <tr><td><strong>5</strong></td><td>Hope Mwenda</td><td>HS/033</td><td>Grade 10</td><td>89%</td><td><span class="gp ga">A</span></td><td class="up">↑ +3</td></tr>
+          <tr><td><strong>6</strong></td><td>Joyce Mwangi</td><td>HS/021</td><td>Grade 7</td><td>90%</td><td><span class="gp ga">A</span></td><td class="up">↑ +6</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== SUBJECT ANALYSIS ===== -->
+  <div class="panel" id="panel-subject">
+    <div class="fbar">
+      <div class="fg"><label>Subject</label><select><option>Mathematics</option><option>English</option><option>Biology</option><option>Chemistry</option><option>Physics</option><option>Kiswahili</option></select></div>
+      <div class="fg"><label>Grade/Form</label><select><option>Form 4</option><option>Form 3</option><option>Grade 11</option><option>Grade 10</option></select></div>
+      <div class="fg"><label>Term</label><select><option>Term 2 — 2025</option><option>Term 1 — 2025</option></select></div>
+    </div>
+    <div class="metrics">
+      <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval">78%</div><div class="mlbl">Subject Mean</div></div>
+      <div class="mcard"><i class="ti ti-arrow-up"></i><div class="mval">96%</div><div class="mlbl">Highest Score</div></div>
+      <div class="mcard"><i class="ti ti-arrow-down"></i><div class="mval">42%</div><div class="mlbl">Lowest Score</div></div>
+      <div class="mcard"><i class="ti ti-users"></i><div class="mval">88%</div><div class="mlbl">Pass Rate</div></div>
+    </div>
+    <div class="chart-card" style="margin-bottom:1.25rem">
+      <h4>Score distribution — Mathematics</h4>
+      <div style="margin-top:.75rem">
+        <div class="pbar-wrap"><div class="pbar-label"><span>A (80–100%)</span><span>40%</span></div><div class="pbar"><div class="pbar-fill" style="width:40%;background:#3B6D11"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span>B (65–79%)</span><span>27%</span></div><div class="pbar"><div class="pbar-fill" style="width:27%;background:#2d72c8"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span>C (50–64%)</span><span>20%</span></div><div class="pbar"><div class="pbar-fill" style="width:20%;background:#EF9F27"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span>D (below 50%)</span><span>13%</span></div><div class="pbar"><div class="pbar-fill" style="width:13%;background:#a32d2d"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DOWNLOAD REPORTS ===== -->
+  <div class="panel" id="panel-reports">
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.25rem">Click any report type below to generate and download it instantly.</p>
+    <div class="cards-grid">
+      <div class="dcard" onclick="downloadPDF()"><i class="ti ti-file-text"></i><h3>Full School Report (PDF)</h3><p>All grades, all subjects, rankings, and analysis in one PDF — like Zeraki's report download.</p></div>
+      <div class="dcard" onclick="downloadCSV()"><i class="ti ti-file-spreadsheet"></i><h3>Export to Excel (CSV)</h3><p>Download all results as a CSV file — open in Excel or Google Sheets for further analysis.</p></div>
+      <div class="dcard" onclick="downloadClassReport()"><i class="ti ti-users"></i><h3>Class Report Cards</h3><p>Individual student report cards with grades, remarks, and class position.</p></div>
+      <div class="dcard" onclick="downloadRankingPDF()"><i class="ti ti-trophy"></i><h3>Rankings PDF</h3><p>School-wide and per-grade student rankings sorted by mean score.</p></div>
+      <div class="dcard" onclick="downloadSubjectPDF()"><i class="ti ti-chart-bar"></i><h3>Subject Analysis PDF</h3><p>Per-subject performance analysis showing mean, highest, lowest and grade distribution.</p></div>
+      <div class="dcard" onclick="downloadPDF()"><i class="ti ti-certificate"></i><h3>KCSE Mock Analysis</h3><p>Form 3 &amp; 4 mock results with grade projections and improvement recommendations.</p></div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<script>
+/* ========== AUTH GUARD ========== */
+const ud = JSON.parse(sessionStorage.getItem('hs_user')||'null');
+if(!ud) window.location.href='login.html';
+else {
+  document.getElementById('sbName').textContent = ud.name||'Teacher';
+  document.getElementById('sbRole').textContent = ud.role||'Teacher';
+}
+function doLogout(){ sessionStorage.removeItem('hs_user'); window.location.href='login.html'; }
+
+/* ========== PANEL NAV ========== */
+const titles={dashboard:'Dashboard',upload:'Upload Marks',manual:'Enter Marks Manually',
+  cbc_lower:'CBC — Grade 1 to 6',cbc_junior:'CBC — Grade 7 to 9',cbc_senior:'CBC — Grade 10 & 11',
+  form34:'8-4-4 — Form 3 & 4',ranking:'Class Rankings',subject:'Subject Analysis',reports:'Download Reports'};
+
+function showPanel(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('panelTitle').textContent=titles[name]||name;
+}
+
+function setTab(btn){
+  btn.closest('.tab-row').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ========== GRADE/SUBJECT DATA ========== */
+const gradeMap={cbc:['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11'],'844':['Form 3','Form 4']};
+const subjectMap={
+  cbc:['Literacy & Language','Numeracy','Environmental Activities','Creative Arts','Religious Education','Movement & Creative','Integrated Science','Social Studies','Pre-Technical Studies','Agriculture','Business Studies'],
+  '844':['Mathematics','English','Kiswahili','Biology','Chemistry','Physics','History & Government','Geography','CRE','Computer Studies','Agriculture']
+};
+function fillSelects(currId,gradeId,subjId){
+  const curr=document.getElementById(currId).value;
+  const gr=document.getElementById(gradeId);
+  const sb=document.getElementById(subjId);
+  gr.innerHTML=gradeMap[curr].map(g=>`<option>${g}</option>`).join('');
+  sb.innerHTML=subjectMap[curr].map(s=>`<option>${s}</option>`).join('');
+}
+function updateSubjects(){ fillSelects('upCurr','upGrade','upSubject'); }
+function updateManSubjects(){ fillSelects('manCurr','manGrade','manSubject'); }
+updateSubjects(); updateManSubjects();
+
+/* ========== GRADING LOGIC ========== */
+function getGrade(score,max){
+  const pct=(score/max)*100;
+  if(pct>=80) return{g:'A',cls:'ga',remark:'Excellent'};
+  if(pct>=65) return{g:'B',cls:'gb',remark:'Good'};
+  if(pct>=50) return{g:'C',cls:'gc',remark:'Average'};
+  if(pct>=40) return{g:'D',cls:'gd',remark:'Below Average'};
+  return{g:'E',cls:'gd',remark:'Fail — Needs support'};
+}
+
+/* ========== MANUAL ENTRY ========== */
+let rowN=0;
+function addRow(){
+  rowN++;
+  const tr=document.createElement('tr');
+  tr.id='mr-'+rowN;
+  tr.innerHTML=`
+    <td>${rowN}</td>
+    <td><input type="text" placeholder="Student name" style="width:140px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.82rem"/></td>
+    <td><input type="text" placeholder="Adm no." style="width:80px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.82rem"/></td>
+    <td><input type="number" min="0" max="1000" placeholder="Score" style="width:75px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.82rem" oninput="liveGrade(this,${rowN})"/></td>
+    <td id="ag-${rowN}">—</td>
+    <td id="rem-${rowN}" style="color:var(--muted);font-size:.82rem">—</td>
+    <td><button onclick="document.getElementById('mr-${rowN}').remove()" style="background:none;border:none;cursor:pointer;color:var(--red)"><i class="ti ti-trash" style="font-size:15px"></i></button></td>`;
+  document.getElementById('manBody').appendChild(tr);
+}
+
+function liveGrade(inp,id){
+  const max=parseInt(document.getElementById('maxMark').value)||100;
+  const v=parseFloat(inp.value);
+  if(isNaN(v)){document.getElementById('ag-'+id).innerHTML='—';document.getElementById('rem-'+id).textContent='—';return;}
+  const {g,cls,remark}=getGrade(v,max);
+  document.getElementById('ag-'+id).innerHTML=`<span class="gp ${cls}">${g}</span>`;
+  document.getElementById('rem-'+id).textContent=remark;
+}
+
+/* ========== COLLECT MANUAL DATA ========== */
+function collectManualData(){
+  const max=parseInt(document.getElementById('maxMark').value)||100;
+  const rows=document.getElementById('manBody').querySelectorAll('tr');
+  const data=[];
+  rows.forEach((tr,i)=>{
+    const inputs=tr.querySelectorAll('input');
+    const name=inputs[0]?.value.trim()||'';
+    const adm=inputs[1]?.value.trim()||'';
+    const score=parseFloat(inputs[2]?.value)||0;
+    if(name){
+      const pct=Math.round((score/max)*100);
+      const {g,remark}=getGrade(score,max);
+      data.push({rank:i+1,name,adm,score,pct,grade:g,remark,max});
+    }
+  });
+  return data.sort((a,b)=>b.score-a.score).map((d,i)=>({...d,rank:i+1}));
+}
+
+/* ========== RUN ANALYSIS ========== */
+function runAnalysis(){
+  const data=collectManualData();
+  if(!data.length){alert('Please add at least one student with a name and score.');return;}
+  const max=data[0].max;
+  const mean=Math.round(data.reduce((s,d)=>s+d.pct,0)/data.length);
+  const highest=data[0].pct;
+  const lowest=data[data.length-1].pct;
+  const passed=data.filter(d=>d.pct>=50).length;
+  const passRate=Math.round((passed/data.length)*100);
+  const grades={A:0,B:0,C:0,D:0,E:0};
+  data.forEach(d=>grades[d.grade]=(grades[d.grade]||0)+1);
+
+  document.getElementById('analysisMetrics').innerHTML=`
+    <div class="mcard"><i class="ti ti-users"></i><div class="mval">${data.length}</div><div class="mlbl">Students</div></div>
+    <div class="mcard"><i class="ti ti-chart-bar"></i><div class="mval">${mean}%</div><div class="mlbl">Class Mean</div></div>
+    <div class="mcard"><i class="ti ti-arrow-up"></i><div class="mval">${highest}%</div><div class="mlbl">Highest Score</div></div>
+    <div class="mcard"><i class="ti ti-award"></i><div class="mval">${passRate}%</div><div class="mlbl">Pass Rate</div></div>`;
+
+  const total=data.length;
+  document.getElementById('gradeDistBars').innerHTML=Object.entries(grades).filter(([,v])=>v>0).map(([g,c])=>{
+    const pct=Math.round((c/total)*100);
+    const cls=g==='A'?'#3B6D11':g==='B'?'#2d72c8':g==='C'?'#EF9F27':'#a32d2d';
+    return `<div class="pbar-wrap"><div class="pbar-label"><span>Grade ${g} — ${c} students</span><span>${pct}%</span></div><div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${cls}"></div></div></div>`;
+  }).join('');
+
+  document.getElementById('analysisBody').innerHTML=data.map(d=>`
+    <tr>
+      <td>${d.rank}</td><td>${d.name}</td><td>${d.adm||'—'}</td>
+      <td>${d.score}/${d.max}</td><td>${d.pct}%</td>
+      <td><span class="gp ${d.pct>=80?'ga':d.pct>=65?'gb':d.pct>=50?'gc':'gd'}">${d.grade}</span></td>
+      <td style="color:var(--muted);font-size:.82rem">${d.remark}</td>
+    </tr>`).join('');
+
+  document.getElementById('analysisResult').style.display='block';
+  document.getElementById('analysisResult').scrollIntoView({behavior:'smooth'});
+}
+
+/* ========== FILE UPLOAD ========== */
+function handleUpload(input){
+  if(!input.files.length) return;
+  const file=input.files[0];
+  /* Demo parse — in production use SheetJS to parse real Excel files */
+  const demo=[
+    {name:'Aisha Mwenda',adm:'HS/001',score:88},{name:'Brenda Otieno',adm:'HS/002',score:76},
+    {name:'Clara Kamau',adm:'HS/003',score:91},{name:'Diana Njoroge',adm:'HS/004',score:65},
+    {name:'Esther Wanjiku',adm:'HS/005',score:83},{name:'Faith Achieng',adm:'HS/006',score:55},
+  ];
+  const sorted=demo.sort((a,b)=>b.score-a.score);
+  document.getElementById('previewLabel').textContent=sorted.length+' students from '+file.name;
+  document.getElementById('previewBody').innerHTML=sorted.map((r,i)=>{
+    const {g,cls,remark}=getGrade(r.score,100);
+    return `<tr><td>${i+1}</td><td>${r.name}</td><td>${r.adm}</td><td>${r.score}/100 (${r.score}%)</td><td><span class="gp ${cls}">${g}</span></td><td style="color:var(--muted);font-size:.82rem">${remark}</td></tr>`;
+  }).join('');
+  document.getElementById('uploadPreview').style.display='block';
+}
+
+/* ========== DOWNLOAD CSV (like Zeraki export) ========== */
+function downloadCSV(){
+  const panel=document.querySelector('.panel.active').id.replace('panel-','');
+  const tableId={
+    dashboard:'dashTopTable',upload:'previewBody',manual:'analysisBody',
+    cbc_lower:'cbcLowerTable',cbc_junior:'cbcJuniorTable',cbc_senior:'cbcSeniorTable',
+    form34:'form34Table',ranking:'rankTable',subject:'rankTable',reports:'rankTable'
+  }[panel]||'rankTable';
+
+  const table=document.getElementById(tableId);
+  if(!table){alert('No data to export yet. Please upload or enter marks first.');return;}
+
+  let csv='';
+  /* Add school header */
+  csv+='St.Clare Girls Centre — Results Export\n';
+  csv+='Generated: '+new Date().toLocaleDateString('en-KE')+'\n\n';
+
+  /* Headers */
+  const ths=table.querySelectorAll('thead th');
+  if(ths.length) csv+=Array.from(ths).map(th=>'"'+th.textContent.trim()+'"').join(',')+'\n';
+
+  /* Rows */
+  const tbody=table.tagName==='TABLE'?table.querySelector('tbody'):table;
+  const rows=tbody?tbody.querySelectorAll('tr'):[];
+  rows.forEach(tr=>{
+    const cells=tr.querySelectorAll('td');
+    csv+=Array.from(cells).map(td=>'"'+td.textContent.trim()+'"').join(',')+'\n';
+  });
+
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='St Clare_Results_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+/* ========== DOWNLOAD PDF (like Zeraki report) ========== */
+function downloadPDF(){
+  const {jsPDF}=window.jspdf;
+  if(!jsPDF){alert('PDF library loading, please try again in a moment.');return;}
+  const doc=new jsPDF();
+  const panel=document.querySelector('.panel.active').id.replace('panel-','');
+  const title=titles[panel]||'Results Report';
+
+  /* Header */
+  doc.setFontSize(16);
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(26,79,138);
+  doc.text('St.Clare Girls Centre',105,18,{align:'center'});
+
+  doc.setFontSize(11);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(90,110,135);
+  doc.text('Excellence · Integrity · Service',105,25,{align:'center'});
+
+  doc.setFontSize(13);
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(13,26,46);
+  doc.text(title,105,35,{align:'center'});
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(90,110,135);
+  doc.text('Generated: '+new Date().toLocaleDateString('en-KE')+' by '+ud.name,105,41,{align:'center'});
+
+  /* Line */
+  doc.setDrawColor(205,216,234);
+  doc.line(14,44,196,44);
+
+  /* Find active table */
+  const tableMap={
+    dashboard:'dashTopTable',upload:'previewBody',manual:'analysisBody',
+    cbc_lower:'cbcLowerTable',cbc_junior:'cbcJuniorTable',cbc_senior:'cbcSeniorTable',
+    form34:'form34Table',ranking:'rankTable',reports:'rankTable'
+  };
+  const tId=tableMap[panel]||'rankTable';
+  const tEl=document.getElementById(tId);
+  if(!tEl){doc.text('No data available. Please upload or enter marks first.',105,60,{align:'center'});doc.save('Report.pdf');return;}
+
+  const tableEl=tEl.tagName==='TABLE'?tEl:tEl.closest('table');
+  if(!tableEl){doc.save('Report.pdf');return;}
+
+  /* Extract headers and rows */
+  const headers=Array.from(tableEl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
+  const rows=Array.from(tableEl.querySelectorAll('tbody tr')).map(tr=>
+    Array.from(tr.querySelectorAll('td')).map(td=>td.textContent.trim())
+  );
+
+  /* Compute column styles */
+  const colStyles={};
+  headers.forEach((_,i)=>{colStyles[i]={cellWidth:'auto',halign:'left'};});
+
+  doc.autoTable({
+    head:[headers],
+    body:rows,
+    startY:48,
+    theme:'grid',
+    headStyles:{fillColor:[26,79,138],textColor:255,fontSize:8,fontStyle:'bold'},
+    bodyStyles:{fontSize:8,textColor:[13,26,46]},
+    alternateRowStyles:{fillColor:[232,240,251]},
+    styles:{overflow:'linebreak',cellPadding:3},
+    margin:{left:14,right:14},
+  });
+
+  /* Footer */
+  const pageCount=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFontSize(7);
+    doc.setTextColor(150);
+    doc.text('St.Clare Girls Centre — Confidential Staff Report — Page '+i+' of '+pageCount,105,doc.internal.pageSize.height-8,{align:'center'});
+  }
+
+  doc.save('St Clare_'+title.replace(/ /g,'_')+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+}
+
+function downloadRankingPDF(){ showPanel('ranking',null); setTimeout(downloadPDF,100); }
+function downloadSubjectPDF(){ showPanel('subject',null); setTimeout(downloadPDF,100); }
+function downloadClassReport(){
+  alert('Generating individual report cards...\n\nIn production: this will create one PDF page per student with their full results, class position and teacher remarks.');
+}
+
+/* ========== CSV TEMPLATE ========== */
+function dlTemplate(){
+  const curr=document.getElementById('upCurr').value;
+  const grade=document.getElementById('upGrade').value;
+  const subj=document.getElementById('upSubject').value;
+  const max=100;
+  let csv=`Admission Number,Student Name,${subj} Score (out of ${max}),Remarks\n`;
+  csv+=`HS/001,Example Student,85,Good performance\n`;
+  csv+=`HS/002,Another Student,72,Needs improvement\n`;
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`Template_${grade.replace(/ /g,'_')}_${subj.replace(/ /g,'_')}.csv`;
+  a.click();
+}
+
+/* pre-add 5 rows to manual entry */
+for(let i=0;i<5;i++) addRow();
+</script>
 </body>
 </html>

@@ -3,218 +3,424 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Teacher Login — St Clare Girls School</title>
+  <title>Staff Login — St.Clare Girls Centre</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
-  <link rel="stylesheet" href="css/style.css"/>
+  <!-- Supabase JS SDK (the database) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .login-page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--blue:#1a4f8a;--blue-light:#2d72c8;--blue-pale:#e8f0fb;--accent:#f0c040;--muted:#5a6e87;--border:#cdd8ea;--red:#a32d2d;}
+    body{
+      font-family:'DM Sans',sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+      /* Background — replace school-bg.jpg with your actual school photo */
+      background:
+        linear-gradient(rgba(10,30,60,0.75),rgba(10,30,60,0.75)),
+        url('../assets/school-bg.jpg') center/cover no-repeat,
+        linear-gradient(135deg,#1a4f8a 0%,#2d72c8 100%);
+    }
+    .card{
+      background:#fff;
+      border-radius:16px;
+      padding:2.5rem 2rem;
+      width:100%;
+      max-width:440px;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+    }
+    /* Logo */
+    .logo-wrap{text-align:center;margin-bottom:1.5rem;}
+    .logo-circle{
+      width:64px;height:64px;background:var(--blue-pale);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto .75rem;font-family:'Playfair Display',serif;
+      font-weight:700;font-size:22px;color:var(--blue);
+      border:3px solid var(--blue-pale);outline:2px solid #b5d4f4;
+    }
+    .logo-wrap h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--blue);margin-bottom:.2rem;}
+    .logo-wrap p{font-size:.82rem;color:var(--muted);}
 
-      /* BACKGROUND PHOTO — replace url() with your actual image path */
-      background: linear-gradient(rgba(17, 83, 181, 0.72), rgba(10,30,60,0.72)),
-                  url('assets/school-bg.jpg') center/cover no-repeat;
+    /* Role tabs */
+    .role-tabs{display:flex;gap:6px;margin:1.1rem 0;}
+    .rtab{
+      flex:1;padding:9px 6px;border:1px solid var(--border);border-radius:8px;
+      font-size:.8rem;font-family:'DM Sans',sans-serif;background:#fff;
+      cursor:pointer;color:var(--muted);transition:all .2s;text-align:center;
     }
-    .login-card {
-      background: #c25744;
-      border-radius: 16px;
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    .rtab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .rtab i{font-size:13px;margin-right:3px;}
+
+    /* Divider */
+    .div{border:none;border-top:1px solid var(--border);margin:1rem 0;}
+
+    /* Error/success messages */
+    .msg{
+      border-radius:8px;padding:9px 14px;font-size:.84rem;
+      margin-bottom:1rem;display:none;align-items:center;gap:6px;
     }
-    .login-logo {
-      text-align: center;
-      margin-bottom: 1.5rem;
+    .msg-error{background:#fcebeb;color:var(--red);border:1px solid #f7c1c1;}
+    .msg-success{background:#eaf3de;color:#3B6D11;border:1px solid #c0dd97;}
+
+    /* Form */
+    .fg{margin-bottom:1rem;}
+    .fg label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:.35rem;}
+    .fg input{
+      width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;
+      font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;
     }
-    .login-logo .logo-icon {
-      width: 56px; height: 56px; font-size: 20px;
-      margin: 0 auto .75rem;
+    .fg input:focus{border-color:var(--blue-light);}
+    .pw-wrap{position:relative;}
+    .pw-wrap input{padding-right:40px;}
+    .pw-toggle{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;
     }
-    .login-logo h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-      color: var(--blue);
-      margin-bottom: .2rem;
+
+    /* Submit */
+    .login-btn{
+      width:100%;background:var(--blue);color:#fff;border:none;padding:12px;
+      border-radius:8px;font-size:.95rem;font-family:'DM Sans',sans-serif;
+      font-weight:500;cursor:pointer;transition:background .2s;
+      display:flex;align-items:center;justify-content:center;gap:7px;
     }
-    .login-logo p {
-      font-size: .82rem;
-      color: var(--muted);
+    .login-btn:hover{background:var(--blue-light);}
+    .login-btn:disabled{background:#999;cursor:not-allowed;}
+
+    /* Loading spinner */
+    .spinner{
+      width:16px;height:16px;border:2px solid rgba(255,255,255,.4);
+      border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;
     }
-    .login-divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 1.25rem 0;
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* DB status */
+    .db-status{
+      display:flex;align-items:center;gap:6px;font-size:.75rem;
+      color:var(--muted);margin-bottom:1rem;padding:.5rem .75rem;
+      background:var(--blue-pale);border-radius:6px;
     }
-    .form-group { margin-bottom: 1rem; }
-    .form-group label {
-      font-size: .82rem;
-      color: var(--muted);
-      display: block;
-      margin-bottom: .35rem;
+    .db-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;}
+    .db-dot.connected{background:#3B6D11;}
+    .db-dot.offline{background:#EF9F27;}
+
+    /* Demo hint */
+    .demo-hint{
+      background:var(--blue-pale);border-radius:8px;padding:.75rem 1rem;
+      font-size:.78rem;color:var(--blue);margin-top:1rem;line-height:1.8;
     }
-    .form-group input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: .9rem;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
-      transition: border .2s;
-    }
-    .form-group input:focus { border-color: var(--blue-light); }
-    .login-btn {
-      width: 100%;
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: .95rem;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .2s;
-      margin-top: .5rem;
-    }
-    .login-btn:hover { background: var(--blue-light); }
-    .login-back {
-      text-align: center;
-      margin-top: 1.25rem;
-      font-size: .83rem;
-      color: var(--muted);
-    }
-    .login-back a { color: var(--blue-light); }
-    .error-msg {
-      background: #fcebeb;
-      color: var(--red);
-      border: 1px solid #f7c1c1;
-      border-radius: 8px;
-      padding: 9px 14px;
-      font-size: .85rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .role-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 1.25rem;
-    }
-    .role-tab {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: .82rem;
-      font-family: 'DM Sans', sans-serif;
-      background: #fff;
-      cursor: pointer;
-      color: var(--muted);
-      transition: all .2s;
-      text-align: center;
-    }
-    .role-tab.active {
-      background: var(--blue);
-      color: #fff;
-      border-color: var(--blue);
-    }
+    .demo-hint strong{display:block;margin-bottom:.25rem;}
+
+    /* Back link */
+    .back{text-align:center;margin-top:1.25rem;font-size:.82rem;color:var(--muted);}
+    .back a{color:var(--blue-light);}
+
+    /* Forgot password */
+    .forgot{text-align:right;margin-top:.25rem;}
+    .forgot a{font-size:.78rem;color:var(--blue-light);}
+
+    /* Reset form (hidden by default) */
+    .reset-form{display:none;}
   </style>
 </head>
 <body>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-logo">
-        <div class="logo-icon" style="background:#e8f0fb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:#1a4f8a;">SC</div>
-        <h1>St Clare Girls School</h1>
-        <p>Staff Portal — Analytics &amp; Results</p>
-      </div>
 
-      <div class="role-tabs">
-        <button class="role-tab active" onclick="setRole('teacher',this)">
-          <i class="ti ti-school" style="font-size:14px;margin-right:4px"></i>Teacher
-        </button>
-        <button class="role-tab" onclick="setRole('admin',this)">
-          <i class="ti ti-shield" style="font-size:14px;margin-right:4px"></i>Admin
-        </button>
-        <button class="role-tab" onclick="setRole('hod',this)">
-          <i class="ti ti-users" style="font-size:14px;margin-right:4px"></i>HOD
-        </button>
-      </div>
+<div class="card">
 
-      <hr class="login-divider"/>
-
-      <div class="error-msg" id="errorMsg">
-        <i class="ti ti-alert-circle" style="margin-right:6px"></i>
-        Incorrect email or password. Please try again.
-      </div>
-
-      <form id="loginForm">
-        <div class="form-group">
-          <label>Staff Email Address</label>
-          <input type="email" id="loginEmail" placeholder="yourname@stclare.ac.ke" required/>
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="Enter your password" required/>
-        </div>
-        <button type="submit" class="login-btn">
-          <i class="ti ti-login" style="margin-right:6px"></i>Sign In to Portal
-        </button>
-      </form>
-
-      <div class="login-back">
-        <a href="index.html"><i class="ti ti-arrow-left" style="font-size:12px"></i> Back to school website</a>
-        &nbsp;·&nbsp;
-        <a href="mailto:admin@stclare.ac.ke">Forgot password?</a>
-      </div>
-    </div>
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo-circle">SC</div>
+    <h1>St.Clare Girls Centre</h1>
+    <p>Staff Portal &mdash; Analytics &amp; Results</p>
   </div>
 
-  <script>
-    let currentRole = 'teacher';
+  <!-- Database connection status -->
+  <div class="db-status">
+    <div class="db-dot" id="dbDot"></div>
+    <span id="dbStatusText">Connecting to database...</span>
+  </div>
 
-    function setRole(role, btn) {
-      currentRole = role;
-      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
+  <!-- Role selector -->
+  <div class="role-tabs">
+    <button class="rtab active" onclick="setRole('teacher',this)"><i class="ti ti-school"></i>Teacher</button>
+    <button class="rtab" onclick="setRole('hod',this)"><i class="ti ti-users"></i>HOD</button>
+    <button class="rtab" onclick="setRole('admin',this)"><i class="ti ti-shield"></i>Admin</button>
+    <button class="rtab" onclick="setRole('principal',this)"><i class="ti ti-crown"></i>Principal</button>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- Error / Success messages -->
+  <div class="msg msg-error" id="errMsg"><i class="ti ti-alert-circle"></i><span id="errText">Incorrect email or password.</span></div>
+  <div class="msg msg-success" id="okMsg"><i class="ti ti-circle-check"></i><span id="okText">Login successful! Redirecting...</span></div>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm" class="login-form">
+    <div class="fg">
+      <label>Staff Email Address</label>
+      <input type="email" id="lemail" placeholder="yourname@school.ac.ke" required autocomplete="email"/>
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="lpass" placeholder="Enter your password" required autocomplete="current-password"/>
+        <button type="button" class="pw-toggle" onclick="togglePw()"><i class="ti ti-eye" id="pwIcon"></i></button>
+      </div>
+      <div class="forgot"><a href="#" onclick="showReset()">Forgot password?</a></div>
+    </div>
+    <button type="submit" class="login-btn" id="loginBtn">
+      <div class="spinner" id="spinner"></div>
+      <i class="ti ti-login" id="loginIcon"></i>
+      <span id="loginText">Sign In to Portal</span>
+    </button>
+  </form>
+
+  <!-- RESET PASSWORD FORM (shown when "Forgot password" clicked) -->
+  <form id="resetForm" class="reset-form">
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Enter your school email and we will send a reset link.</p>
+    <div class="fg">
+      <label>Staff Email</label>
+      <input type="email" id="resetEmail" placeholder="yourname@school.ac.ke" required/>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button type="submit" class="login-btn" style="background:#3B6D11">
+        <i class="ti ti-send"></i> Send Reset Link
+      </button>
+      <button type="button" class="login-btn" style="background:#888;flex:0 0 auto;width:auto;padding:12px 16px" onclick="showLogin()">
+        Cancel
+      </button>
+    </div>
+  </form>
+
+  <!-- Demo credentials (remove before going live) -->
+  <div class="demo-hint" id="demoHint">
+    <strong>Demo login credentials (remove before going live):</strong>
+    Teacher: teacher@school.ac.ke / teacher123<br/>
+    Admin: admin@school.ac.ke / admin123<br/>
+    HOD: hod@school.ac.ke / hod123<br/>
+    Principal: principal@school.ac.ke / principal123
+  </div>
+
+  <div class="back">
+    <a href="../index.html"><i class="ti ti-arrow-left" style="font-size:11px"></i> Back to school website</a>
+  </div>
+
+</div>
+
+<script>
+/* =================================================================
+   SUPABASE DATABASE SETUP
+   =================================================================
+   Supabase is a FREE database (like Firebase).
+   Steps to connect:
+   1. Go to supabase.com → sign up free
+   2. Create new project → choose a name and password
+   3. Go to Settings → API → copy:
+      - Project URL  → paste as SUPABASE_URL below
+      - anon/public key → paste as SUPABASE_KEY below
+   4. Create a "users" table (SQL below in comments)
+   5. That's it — your login will work with real accounts!
+
+   SQL to run in Supabase SQL editor:
+   ─────────────────────────────────────────
+   create table users (
+     id uuid default gen_random_uuid() primary key,
+     email text unique not null,
+     name text not null,
+     role text not null check (role in ('teacher','hod','admin','principal')),
+     subject text,
+     grade text,
+     created_at timestamp default now()
+   );
+
+   insert into users (email, name, role) values
+     ('teacher@school.ac.ke', 'Mrs. Wanjiru', 'teacher'),
+     ('admin@school.ac.ke', 'Dr. Janet Mwangi', 'admin'),
+     ('hod@school.ac.ke', 'Mr. Odhiambo', 'hod'),
+     ('principal@school.ac.ke', 'Dr. Janet Mwangi', 'principal');
+   ─────────────────────────────────────────
+   Authentication is handled by Supabase Auth automatically.
+   ================================================================= */
+
+  const SUPABASE_URL = 'ybmzqlqxomxihzjprbtv';   // ← paste your URL here
+  const SUPABASE_KEY = 'eu-west-1'; // ← paste your key here
+
+  /* Initialize Supabase */
+  let supabase = null;
+  let dbConnected = false;
+
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    dbConnected = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
+  } catch(e) { dbConnected = false; }
+
+  /* Show DB connection status */
+  const dbDot  = document.getElementById('dbDot');
+  const dbText = document.getElementById('dbStatusText');
+  if (dbConnected) {
+    dbDot.classList.add('connected');
+    dbText.textContent = 'Connected to school database';
+  } else {
+    dbDot.classList.add('offline');
+    dbText.textContent = 'Running in demo mode (no database connected yet)';
+  }
+
+  /* Demo users for offline/demo mode */
+  const DEMO_USERS = {
+    'teacher@school.ac.ke':   { password:'teacher123',   name:'Mrs. Wanjiru',      role:'teacher'   },
+    'admin@school.ac.ke':     { password:'admin123',     name:'Dr. Janet Mwangi',  role:'admin'     },
+    'hod@school.ac.ke':       { password:'hod123',       name:'Mr. Odhiambo',      role:'hod'       },
+    'principal@school.ac.ke': { password:'principal123', name:'Dr. Janet Mwangi',  role:'principal' },
+  };
+
+  let currentRole = 'teacher';
+
+  function setRole(r, btn) {
+    currentRole = r;
+    document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function togglePw() {
+    const inp  = document.getElementById('lpass');
+    const icon = document.getElementById('pwIcon');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.className = 'ti ti-eye-off';
+    } else {
+      inp.type = 'password';
+      icon.className = 'ti ti-eye';
     }
+  }
 
-    /* ============================================================
-       DEMO CREDENTIALS (replace with real backend authentication)
-       In production connect to Firebase / Supabase / your backend
-       ============================================================ */
-    const DEMO_USERS = {
-      'teacher@stclare.ac.ke':  { password: 'teacher123', role: 'teacher', name: 'Mrs. Wanjiru' },
-      'admin@stclare.ac.ke':    { password: 'admin123',   role: 'admin',   name: 'Dr. Janet Mwangi' },
-      'hod@stclare.ac.ke':      { password: 'hod123',     role: 'hod',     name: 'Mr. Odhiambo' },
-    };
+  function showError(msg) {
+    const el = document.getElementById('errMsg');
+    document.getElementById('errText').textContent = msg;
+    el.style.display = 'flex';
+    document.getElementById('okMsg').style.display = 'none';
+  }
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
-      const password = document.getElementById('loginPassword').value;
-      const errorMsg = document.getElementById('errorMsg');
+  function showSuccess(msg) {
+    const el = document.getElementById('okMsg');
+    document.getElementById('okText').textContent = msg;
+    el.style.display = 'flex';
+    document.getElementById('errMsg').style.display = 'none';
+  }
 
-      const user = DEMO_USERS[email];
-      if (user && user.password === password) {
-        /* Save session */
-        sessionStorage.setItem('sc_user', JSON.stringify({ email, name: user.name, role: user.role }));
-        errorMsg.style.display = 'none';
-        window.location.href = 'analytics.html';
-      } else {
-        errorMsg.style.display = 'block';
+  function setLoading(on) {
+    const btn = document.getElementById('loginBtn');
+    document.getElementById('spinner').style.display   = on ? 'block' : 'none';
+    document.getElementById('loginIcon').style.display = on ? 'none' : 'inline';
+    document.getElementById('loginText').textContent   = on ? 'Signing in...' : 'Sign In to Portal';
+    btn.disabled = on;
+  }
+
+  function saveSession(user) {
+    sessionStorage.setItem('hs_user', JSON.stringify(user));
+  }
+
+  function redirectAfterLogin() {
+    /* Redirect back to analytics dashboard */
+    window.location.href = '../analytics.html';
+  }
+
+  /* ---- MAIN LOGIN HANDLER ---- */
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('lemail').value.trim().toLowerCase();
+    const pass  = document.getElementById('lpass').value;
+
+    document.getElementById('errMsg').style.display = 'none';
+    setLoading(true);
+
+    if (dbConnected && supabase) {
+      /* ---- REAL DATABASE LOGIN via Supabase Auth ---- */
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+
+        if (error) {
+          setLoading(false);
+          showError('Incorrect email or password. Please try again.');
+          return;
+        }
+
+        /* Fetch user profile from users table */
+        const { data: profile } = await supabase
+          .from('users')
+          .select('name, role, subject, grade')
+          .eq('email', email)
+          .single();
+
+        const user = {
+          email,
+          name:    profile?.name    || email,
+          role:    profile?.role    || currentRole,
+          subject: profile?.subject || '',
+          grade:   profile?.grade   || '',
+        };
+
+        saveSession(user);
+        setLoading(false);
+        showSuccess('Login successful! Redirecting...');
+        setTimeout(redirectAfterLogin, 1000);
+
+      } catch (err) {
+        setLoading(false);
+        showError('Connection error. Please check your internet and try again.');
       }
-    });
 
-    /* Redirect if already logged in */
-    if (sessionStorage.getItem('sc_user')) {
-      window.location.href = 'analytics.html';
+    } else {
+      /* ---- DEMO MODE LOGIN (no database connected) ---- */
+      setTimeout(() => {
+        const u = DEMO_USERS[email];
+        if (u && u.password === pass) {
+          saveSession({ email, name: u.name, role: u.role });
+          setLoading(false);
+          showSuccess('Login successful! Redirecting...');
+          setTimeout(redirectAfterLogin, 1000);
+        } else {
+          setLoading(false);
+          showError('Incorrect email or password. Please try again.');
+        }
+      }, 800);
     }
-  </script>
+  });
+
+  /* ---- FORGOT PASSWORD ---- */
+  function showReset() {
+    document.getElementById('loginForm').style.display  = 'none';
+    document.getElementById('resetForm').style.display  = 'block';
+    document.getElementById('demoHint').style.display   = 'none';
+    document.getElementById('errMsg').style.display     = 'none';
+  }
+
+  function showLogin() {
+    document.getElementById('loginForm').style.display  = 'block';
+    document.getElementById('resetForm').style.display  = 'none';
+    document.getElementById('demoHint').style.display   = 'block';
+  }
+
+  document.getElementById('resetForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('resetEmail').value.trim();
+
+    if (dbConnected && supabase) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/pages/login.html'
+      });
+      if (error) { showError('Could not send reset email. Check the address and try again.'); }
+      else        { showSuccess('Reset link sent! Check your email inbox.'); showLogin(); }
+    } else {
+      showSuccess('Demo mode: reset email would be sent to ' + email);
+      showLogin();
+    }
+  });
+
+  /* Redirect if already logged in */
+  if (sessionStorage.getItem('hs_user')) redirectAfterLogin();
+</script>
 </body>
 </html>
